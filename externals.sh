@@ -9,13 +9,13 @@ fi
 if [ -d src/avl ]; then
     svn up src/avl
 else
-    svn checkout http://svn.xiph.org/icecast/trunk/avl
+    svn checkout http://svn.xiph.org/icecast/trunk/avl src/avl
 fi
 
 if [ -d src/httpp ]; then
     svn up src/httpp
 else
-    svn checkout http://svn.xiph.org/icecast/trunk/httpp
+    svn checkout http://svn.xiph.org/icecast/trunk/httpp src/httpp
 fi
 
 if [ -d src/log ]; then
@@ -27,17 +27,17 @@ fi
 if [ -d src/net ]; then
     svn up src/net
 else
-    svn checkout http://svn.xiph.org/icecast/trunk/net
+    svn checkout http://svn.xiph.org/icecast/trunk/net src/net
 fi
 
 if [ -d src/thread ]; then
     svn up src/thread
 else
-    svn checkout http://svn.xiph.org/icecast/trunk/thread
+    svn checkout http://svn.xiph.org/icecast/trunk/thread src/thread
 fi
 
 if [ -d src/timing ]; then
     svn up src/timing
 else
-    svn checkout http://svn.xiph.org/icecast/trunk/timing
+    svn checkout http://svn.xiph.org/icecast/trunk/timing src/timing
 fi
