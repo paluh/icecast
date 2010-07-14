@@ -186,7 +186,7 @@ void logging_playlist(const char *mount, const char *metadata, long listeners)
 #endif
     /* This format MAY CHANGE OVER TIME.  We are looking into finding a good
        standard format for this, if you have any ideas, please let us know */
-    log_write_direct (playlistlog, "%s|%s|%ld|%s",
+    log_write_direct (playlistlog, "<date>%s</date><mount>%s</mount><listeners>%ld</listeners><metadata>%s</metadata>",
              datebuf,
              mount,
              listeners,

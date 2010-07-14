@@ -253,7 +253,7 @@ static void mp3_set_title (source_t *source)
     if (source_mp3->url_title)
         len += strlen (source_mp3->url_title);
     if (source_mp3->url_artist && source_mp3->url_title)
-        len += 3;
+        len += 32;
     if (source_mp3->inline_url)
     {
         char *end = strstr (source_mp3->inline_url, "';");
@@ -283,7 +283,7 @@ static void mp3_set_title (source_t *source)
 
         memset (p->data, '\0', size);
         if (source_mp3->url_artist && source_mp3->url_title)
-            r = snprintf (p->data, size, "%c%s%s - %s';", len_byte, streamtitle,
+            r = snprintf (p->data, size, "%c%s<artist>%s</artist><title>%s</title>';", len_byte, streamtitle,
                     source_mp3->url_artist, source_mp3->url_title);
         else
             r = snprintf (p->data, size, "%c%s%s';", len_byte, streamtitle,
