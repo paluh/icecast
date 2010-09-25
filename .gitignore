@@ -5,3 +5,4 @@ src/log
 src/httpp
 src/thread
 src/timing
+*.o

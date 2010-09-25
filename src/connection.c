@@ -901,6 +901,16 @@ static int _check_pass_http(http_parser_t *parser,
     return 1;
 }
 
+static int _external_authentication(password) {
+    ice_config_t *config = config_get_config ();
+    char *hostname = config->hostname;
+    int port = config->port;
+    DEBUG2("EXTERNAL: %s:%i", hostname, port);
+    config_release_config();
+
+    return 0;
+}
+
 static int _check_pass_icy(http_parser_t *parser, const char *correctpass)
 {
     const char *password;
@@ -909,21 +919,20 @@ static int _check_pass_icy(http_parser_t *parser, const char *correctpass)
     if(!password)
         return 0;
 
-    if (strcmp(password, correctpass))
+    if (strcmp(password, correctpass))// && _external_authentication(password))
         return 0;
     else
         return 1;
 }
-
 static int _check_pass_ice(http_parser_t *parser, const char *correctpass)
 {
     const char *password;
-
     password = httpp_getvar(parser, "ice-password");
+
     if(!password)
         password = "";
 
-    if (strcmp(password, correctpass))
+    if (strcmp(password, correctpass))// && _external_authentication(password))
         return 0;
     else
         return 1;

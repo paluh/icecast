@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "thread/thread.h"
 #include "httpp/httpp.h"
@@ -29,6 +30,7 @@
 #include "cfgfile.h"
 #include "logging.h"
 #include "util.h"
+#include "source.h"
 
 #ifdef _WIN32
 #define snprintf _snprintf
@@ -164,6 +166,7 @@ void logging_access(client_t *client)
 /* This function will provide a log of metadata for each
    mountpoint.  The metadata *must* be in UTF-8, and thus
    you can assume that the log itself is UTF-8 encoded */
+
 void logging_playlist(const char *mount, const char *metadata, long listeners)
 {
     char datebuf[128];
@@ -190,7 +193,20 @@ void logging_playlist(const char *mount, const char *metadata, long listeners)
              datebuf,
              mount,
              listeners,
-             metadata);
+             metadata
+    );
+    ice_config_t *config = config_get_config();
+    if(config->playlist_logger) {
+        char str_listeners[255];
+        sprintf(str_listeners, "%d", listeners);
+
+        setenv("DATE", datebuf, 1);
+        setenv("MOUNT", mount, 1);
+        setenv("LISTENERS", str_listeners, 1);
+        setenv("METADATA", metadata, 1);
+        source_run_script(config->playlist_logger, mount);
+    }
+    config_release_config();
 }
 
 

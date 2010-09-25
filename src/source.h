@@ -20,6 +20,13 @@
 
 #include <stdio.h>
 
+#ifdef _WIN32
+#define source_run_script(x,y)  WARN0("on [dis]connect scripts disabled");
+#else
+void source_run_script (char *command, char *mountpoint);
+#endif
+
+
 typedef struct source_tag
 {
     client_t *client;

@@ -64,12 +64,6 @@ static int _compare_clients(void *compare_arg, void *a, void *b);
 static int _free_client(void *key);
 static void _parse_audio_info (source_t *source, const char *s);
 static void source_shutdown (source_t *source);
-#ifdef _WIN32
-#define source_run_script(x,y)  WARN0("on [dis]connect scripts disabled");
-#else
-static void source_run_script (char *command, char *mountpoint);
-#endif
-
 /* Allocate a new source with the stated mountpoint, if one already
  * exists with that mountpoint in the global source tree then return
  * NULL.
@@ -1277,7 +1271,7 @@ void source_client_callback (client_t *client, void *arg)
 
 
 #ifndef _WIN32
-static void source_run_script (char *command, char *mountpoint)
+void source_run_script (char *command, char *mountpoint)
 {
     pid_t pid, external_pid;
 
