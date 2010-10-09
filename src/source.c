@@ -1,4 +1,4 @@
-/* Icecast
+/* icecast
  *
  * This program is distributed under the GNU General Public License, version 2.
  * A copy of this license is included with this source.
@@ -838,8 +838,15 @@ static void source_shutdown (source_t *source)
     mountinfo = config_find_mount (config_get_config(), source->mount);
     if (mountinfo)
     {
-        if (mountinfo->on_disconnect)
+        if (mountinfo->on_disconnect) {
+            if(source->client) {
+                if(source->client->username)
+                    setenv("USERNAME", source->client->username, 1);
+                if(source->client->password)
+                    setenv("PASSWORD", source->client->password, 1);
+            }
             source_run_script (mountinfo->on_disconnect, source->mount);
+        }
         auth_stream_end (mountinfo, source->mount);
     }
     config_release_config();
