@@ -204,6 +204,8 @@ void logging_playlist(const char *mount, const char *metadata, long listeners)
         setenv("MOUNT", mount, 1);
         setenv("LISTENERS", str_listeners, 1);
         setenv("METADATA", metadata, 1);
+        //FIXME: this is BUG -> there can be other thread which changes environment before this statement!
+        //Environment should be passed to child processes!
         source_run_script(config->playlist_logger, mount);
     }
     config_release_config();

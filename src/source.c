@@ -845,6 +845,8 @@ static void source_shutdown (source_t *source)
                 if(source->client->password)
                     setenv("PASSWORD", source->client->password, 1);
             }
+            //FIXME: this is BUG -> there can be other thread which changes environment before this statement!
+            //Environment should be passed to child process!
             source_run_script (mountinfo->on_disconnect, source->mount);
         }
         auth_stream_end (mountinfo, source->mount);
