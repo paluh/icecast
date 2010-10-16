@@ -839,14 +839,15 @@ static void source_shutdown (source_t *source)
     if (mountinfo)
     {
         if (mountinfo->on_disconnect) {
+            //FIXME: this is BUG -> there can be other thread which changes environment before this statement!
+            //Environment should be passed to child process!
             if(source->client) {
                 if(source->client->username)
                     setenv("USERNAME", source->client->username, 1);
                 if(source->client->password)
                     setenv("PASSWORD", source->client->password, 1);
+                setenv("MOUNTPOINT", source->mount, 1);
             }
-            //FIXME: this is BUG -> there can be other thread which changes environment before this statement!
-            //Environment should be passed to child process!
             source_run_script (mountinfo->on_disconnect, source->mount);
         }
         auth_stream_end (mountinfo, source->mount);
