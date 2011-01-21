@@ -184,6 +184,14 @@ int source_compare_sources(void *arg, void *a, void *b)
     return strcmp(srca->mount, srcb->mount);
 }
 
+void close_dumpfile(source_t *source) {
+    if (source->dumpfile)
+    {
+        INFO1 ("Closing dumpfile for %s", source->mount);
+        fclose (source->dumpfile);
+        source->dumpfile = NULL;
+    }
+}
 
 void source_clear_source (source_t *source)
 {
@@ -201,12 +209,7 @@ void source_clear_source (source_t *source)
     if (source->client && source->format)
         source->client->con->sent_bytes = source->format->read_bytes;
 
-    if (source->dumpfile)
-    {
-        INFO1 ("Closing dumpfile for %s", source->mount);
-        fclose (source->dumpfile);
-        source->dumpfile = NULL;
-    }
+    close_dumpfile(source);
 
     /* lets kick off any clients that are left on here */
     avl_tree_wlock (source->client_tree);
@@ -835,6 +838,8 @@ static void source_shutdown (source_t *source)
     source->running = 0;
     INFO1("Source \"%s\" exiting", source->mount);
 
+    close_dumpfile(source);
+
     mountinfo = config_find_mount (config_get_config(), source->mount);
     if (mountinfo)
     {
@@ -1311,6 +1316,7 @@ void source_run_script (char *command, char *mountpoint)
             waitpid (external_pid, NULL, 0);
             break;
     }
+    DEBUG1 ("After fork from parent %s...", command);
 }
 #endif
 
