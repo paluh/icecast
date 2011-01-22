@@ -51,6 +51,8 @@ typedef struct _mount_proxy {
 
     char *dumpfile; /* Filename to dump this stream to (will be appended). NULL
                        to not dump. */
+    char *dumpdir; /* Dirname for dumps if given all dumps will be created in this directory
+                    and named randomly. */
     char *intro_filename;   /* Send contents of file to client before the stream */
     int fallback_when_full; /* switch new listener to fallback source
                                when max listeners reached */

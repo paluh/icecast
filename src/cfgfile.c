@@ -578,6 +578,10 @@ static void _parse_mount(xmlDocPtr doc, xmlNodePtr node,
             mount->dumpfile = (char *)xmlNodeListGetString(
                     doc, node->xmlChildrenNode, 1);
         }
+        else if (xmlStrcmp (node->name, XMLSTR("dump-dir")) == 0) {
+            mount->dumpdir = (char *)xmlNodeListGetString(
+                    doc, node->xmlChildrenNode, 1);
+        }
         else if (xmlStrcmp (node->name, XMLSTR("intro")) == 0) {
             mount->intro_filename = (char *)xmlNodeListGetString(
                     doc, node->xmlChildrenNode, 1);

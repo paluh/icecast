@@ -187,9 +187,12 @@ int source_compare_sources(void *arg, void *a, void *b)
 void close_dumpfile(source_t *source) {
     if (source->dumpfile)
     {
-        INFO1 ("Closing dumpfile for %s", source->mount);
+        INFO1 ("Closing dumpfile for %s.", source->mount);
+        INFO1 ("Dumpfile for %s.", source->dumpfilename);
         fclose (source->dumpfile);
         source->dumpfile = NULL;
+        free(source->dumpfilename);
+        source->dumpfilename = NULL;
     }
 }
 
@@ -209,7 +212,7 @@ void source_clear_source (source_t *source)
     if (source->client && source->format)
         source->client->con->sent_bytes = source->format->read_bytes;
 
-    close_dumpfile(source);
+    //close_dumpfile(source);
 
     /* lets kick off any clients that are left on here */
     avl_tree_wlock (source->client_tree);
@@ -274,8 +277,8 @@ void source_clear_source (source_t *source)
     free(source->fallback_mount);
     source->fallback_mount = NULL;
 
-    free(source->dumpfilename);
-    source->dumpfilename = NULL;
+    //free(source->dumpfilename);
+    //source->dumpfilename = NULL;
 
     if (source->intro_file)
     {
@@ -608,6 +611,7 @@ static void source_init (source_t *source)
 
     if (source->dumpfilename != NULL)
     {
+        INFO1 ("Opening dumpfile %s.", source->dumpfilename);
         source->dumpfile = fopen (source->dumpfilename, "ab");
         if (source->dumpfile == NULL)
         {
@@ -834,10 +838,13 @@ void source_main (source_t *source)
 static void source_shutdown (source_t *source)
 {
     mount_proxy *mountinfo;
+    char *dumpfilename;
 
     source->running = 0;
     INFO1("Source \"%s\" exiting", source->mount);
 
+    if(source->dumpfilename)
+        dumpfilename = strdup(source->dumpfilename);
     close_dumpfile(source);
 
     mountinfo = config_find_mount (config_get_config(), source->mount);
@@ -851,6 +858,9 @@ static void source_shutdown (source_t *source)
                     setenv("USERNAME", source->client->username, 1);
                 if(source->client->password)
                     setenv("PASSWORD", source->client->password, 1);
+                if(dumpfilename)
+                    setenv("DUMP", dumpfilename, 1);
+                setenv("START", stats_get_value(source->mount, "stream_start"), 1);
                 setenv("MOUNTPOINT", source->mount, 1);
             }
             source_run_script (mountinfo->on_disconnect, source->mount);
@@ -858,6 +868,8 @@ static void source_shutdown (source_t *source)
         auth_stream_end (mountinfo, source->mount);
     }
     config_release_config();
+    if(dumpfilename)
+        free(dumpfilename);
 
     /* we have de-activated the source now, so no more clients will be
      * added, now move the listeners we have to the fallback (if any)
@@ -1125,11 +1137,17 @@ static void source_apply_mount (source_t *source, mount_proxy *mountinfo)
     else
         source->fallback_mount = NULL;
 
-    if (mountinfo && mountinfo->dumpfile)
+    if (mountinfo && (mountinfo->dumpfile || mountinfo->dumpdir))
     {
-        char *filename = source->dumpfilename;
-        source->dumpfilename = strdup (mountinfo->dumpfile);
-        free (filename);
+        if(source->dumpfilename == NULL) {
+            if(mountinfo->dumpdir) {
+                source->dumpfilename = tempnam(mountinfo->dumpdir, NULL);
+            } else {
+                source->dumpfilename = strdup (mountinfo->dumpfile);
+            };
+            INFO1 ("New dumpfile name: %s.", source->dumpfilename);
+            INFO1 ("New dumpfile for: %s.", source->mount);
+        }
     }
     else
         source->dumpfilename = NULL;
