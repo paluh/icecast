@@ -21,7 +21,7 @@ fi
 if [ -d src/log ]; then
     svn up src/log
 else
-    svn checkout http://svn.xiph.org/icecast/trunk/log
+    svn checkout http://svn.xiph.org/icecast/trunk/log src/log
 fi
 
 if [ -d src/net ]; then
