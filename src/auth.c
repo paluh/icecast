@@ -421,7 +421,20 @@ static int add_listener_to_source (source_t *source, client_t *client)
         DEBUG0("kicking off on-demand relay");
         source->on_demand_req = 1;
     }
+
     DEBUG1 ("Added client to %s", source->mount);
+
+    ice_config_t *config = config_get_config();
+
+    if(config->listeners_handler) {
+        char buf[22];
+        memset(buf, '\000', sizeof(buf));
+        snprintf(buf, sizeof(buf)-1, "%lu", client->con->id);
+
+        util_run_script(config->listeners_handler, config->listeners_handler,
+                         buf, client->con->ip, source->mount, "start", NULL);
+    }
+    config_release_config();
     return 0;
 }
 

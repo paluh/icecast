@@ -171,6 +171,7 @@ typedef struct ice_config_tag
     char *error_log;
     char *playlist_log;
     char *playlist_logger;
+    char *listeners_handler;
     int loglevel;
     int logsize;
     int logarchive;

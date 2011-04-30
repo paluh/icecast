@@ -195,6 +195,19 @@ void close_dumpfile(source_t *source) {
         source->dumpfilename = NULL;
     }
 }
+void on_client_disconnect(source_t *source, client_t *client) {
+    char buf[22];
+    ice_config_t *config = config_get_config();
+
+    if(config->listeners_handler) {
+        memset(buf, '\000', sizeof(buf));
+        snprintf(buf, sizeof(buf)-1, "%lu", client->con->id);
+
+        util_run_script(config->listeners_handler, config->listeners_handler,
+                         buf, client->con->ip, source->mount, "end", NULL);
+    }
+    config_release_config();
+}
 
 void source_clear_source (source_t *source)
 {
@@ -225,6 +238,7 @@ void source_clear_source (source_t *source)
             client_t *client = node->key;
             if (client->respcode == 200)
                 c++; /* only count clients that have had some processing */
+            on_client_disconnect (source, client);
             avl_delete (source->client_tree, client, _free_client);
             continue;
         }
@@ -738,7 +752,9 @@ void source_main (source_t *source)
                 client_node = avl_get_next(client_node);
                 if (client->respcode == 200)
                     stats_event_dec (NULL, "listeners");
+                on_client_disconnect (source, client);
                 avl_delete(source->client_tree, (void *)client, _free_client);
+
                 source->listeners--;
                 DEBUG0("Client removed");
                 continue;
@@ -760,6 +776,7 @@ void source_main (source_t *source)
                  */
                 client = (client_t *)client_node->key;
                 client_node = avl_get_next(client_node);
+                on_client_disconnect (source, client);
                 avl_delete(source->pending_tree, (void *)client, _free_client);
 
                 INFO0("Client deleted, exceeding maximum listeners for this "

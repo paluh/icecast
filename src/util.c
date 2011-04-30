@@ -16,6 +16,7 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -688,3 +689,53 @@ int get_line(FILE *file, char *buf, size_t siz)
     return 0;
 }
 
+#ifndef _WIN32
+void util_run_script(char *path, ...) {
+    char **argv;
+    char *p;
+    int i;
+    pid_t pid, external_pid;
+    size_t len = 0;
+    va_list argp;
+
+    va_start(argp, path);
+    while((p = va_arg(argp, char *)) != NULL)
+        len += 1;
+    va_end(argp);
+
+    argv = (char **)malloc((len+1)*sizeof(char*));   /* +1 for trailing NULL */
+    if(argv == NULL)
+        return;
+    argv[len] = NULL;
+
+    va_start(argp, path);
+    for(i=0; i<len; i++) {
+        argv[i] = va_arg(argp, char *);
+    }
+    va_end(argp);
+
+    /* do a fork twice so that the command has init as parent */
+    external_pid = fork();
+    switch (external_pid)
+    {
+        case 0:
+            switch (pid = fork ())
+            {
+                case -1:
+                    break;
+                case 0:  /* child */
+                    execv (path, argv);
+                    exit(0);
+                default: /* parent */
+                    break;
+            }
+            exit (0);
+        case -1:
+            break;
+        default: /* parent */
+            waitpid (external_pid, NULL, 0);
+            break;
+    }
+    free(argv);
+}
+#endif

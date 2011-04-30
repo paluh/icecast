@@ -373,6 +373,7 @@ static void _set_defaults(ice_config_t *configuration)
     configuration->chroot = CONFIG_DEFAULT_CHROOT;
     configuration->chuid = CONFIG_DEFAULT_CHUID;
     configuration->playlist_logger = NULL;
+    configuration->listeners_handler = NULL;
     configuration->user = NULL;
     configuration->group = NULL;
     configuration->num_yp_directories = 0;
@@ -1032,6 +1033,9 @@ static void _parse_logging(xmlDocPtr doc, xmlNodePtr node,
         } else if (xmlStrcmp (node->name, XMLSTR("playlist-logger")) == 0) {
             if (configuration->playlist_logger) xmlFree (configuration->playlist_logger);
             configuration->playlist_logger = (char *)xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
+        } else if (xmlStrcmp (node->name, XMLSTR("listeners-handler")) == 0) {
+            if (configuration->listeners_handler) xmlFree (configuration->listeners_handler);
+            configuration->listeners_handler = (char *)xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
         } else if (xmlStrcmp (node->name, XMLSTR("logsize")) == 0) {
             char *tmp = (char *)xmlNodeListGetString(doc, node->xmlChildrenNode, 1);
             configuration->logsize = atoi(tmp);
