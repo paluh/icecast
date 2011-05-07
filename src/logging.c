@@ -197,17 +197,9 @@ void logging_playlist(const char *mount, const char *metadata, long listeners)
     );
     ice_config_t *config = config_get_config();
     if(config->playlist_logger) {
-        char str_listeners[255];
-        sprintf(str_listeners, "%d", listeners);
-
-        setenv("DATE", datebuf, 1);
-        setenv("MOUNT", mount, 1);
-        setenv("LISTENERS", str_listeners, 1);
-        setenv("METADATA", metadata, 1);
-        //FIXME: this is BUG -> there can be other thread which changes environment before this statement!
-        //Environment should be passed to child processes!
-        source_run_script(config->playlist_logger, mount);
-    }
+        util_run_script(config->playlist_logger, config->playlist_logger,
+                         metadata, mount, datebuf, NULL);
+    };
     config_release_config();
 }
 
