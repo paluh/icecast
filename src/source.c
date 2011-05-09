@@ -196,15 +196,21 @@ void close_dumpfile(source_t *source) {
     }
 }
 void on_client_disconnect(source_t *source, client_t *client) {
-    char buf[22];
+    char con_time[22], discon_time[22], listener_id[22];
     ice_config_t *config = config_get_config();
 
     if(config->listeners_handler) {
-        memset(buf, '\000', sizeof(buf));
-        snprintf(buf, sizeof(buf)-1, "%lu", client->con->id);
+        memset(listener_id, '\000', sizeof(listener_id));
+        snprintf(listener_id, sizeof(listener_id)-1, "%lu", client->con->id);
 
-        util_run_script(config->listeners_handler, config->listeners_handler,
-                         buf, client->con->ip, source->mount, "end", NULL);
+        memset(con_time, '\000', sizeof(con_time));
+        snprintf(con_time, sizeof(con_time)-1, "%lu", (unsigned long)client->con->con_time);
+
+        memset(discon_time, '\000', sizeof(discon_time));
+        snprintf(discon_time, sizeof(discon_time)-1, "%lu", (unsigned long)time(NULL));
+
+        util_run_script(config->listeners_handler, config->listeners_handler, listener_id,
+                         con_time, discon_time, client->con->ip, source->mount, NULL);
     }
     config_release_config();
 }
