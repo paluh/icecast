@@ -197,22 +197,17 @@ void close_dumpfile(source_t *source) {
 }
 void on_client_disconnect(source_t *source, client_t *client) {
     char con_time[22], discon_time[22], listener_id[22];
-    ice_config_t *config = config_get_config();
 
-    if(config->listeners_handler) {
-        memset(listener_id, '\000', sizeof(listener_id));
-        snprintf(listener_id, sizeof(listener_id)-1, "%lu", client->con->id);
+    memset(listener_id, '\000', sizeof(listener_id));
+    snprintf(listener_id, sizeof(listener_id)-1, "%lu", client->con->id);
 
-        memset(con_time, '\000', sizeof(con_time));
-        snprintf(con_time, sizeof(con_time)-1, "%lu", (unsigned long)client->con->con_time);
+    memset(con_time, '\000', sizeof(con_time));
+    snprintf(con_time, sizeof(con_time)-1, "%lu", (unsigned long)client->con->con_time);
 
-        memset(discon_time, '\000', sizeof(discon_time));
-        snprintf(discon_time, sizeof(discon_time)-1, "%lu", (unsigned long)time(NULL));
+    memset(discon_time, '\000', sizeof(discon_time));
+    snprintf(discon_time, sizeof(discon_time)-1, "%lu", (unsigned long)time(NULL));
 
-        util_run_script(config->listeners_handler, config->listeners_handler, listener_id,
-                         con_time, discon_time, client->con->ip, source->mount, NULL);
-    }
-    config_release_config();
+    log_listener(listener_id, con_time, discon_time, client->con->ip, source->mount);
 }
 
 void source_clear_source (source_t *source)
@@ -244,7 +239,9 @@ void source_clear_source (source_t *source)
             client_t *client = node->key;
             if (client->respcode == 200)
                 c++; /* only count clients that have had some processing */
+            #ifdef HAVE_CURL
             on_client_disconnect (source, client);
+            #endif
             avl_delete (source->client_tree, client, _free_client);
             continue;
         }
@@ -758,7 +755,9 @@ void source_main (source_t *source)
                 client_node = avl_get_next(client_node);
                 if (client->respcode == 200)
                     stats_event_dec (NULL, "listeners");
+                #ifdef HAVE_CURL
                 on_client_disconnect (source, client);
+                #endif
                 avl_delete(source->client_tree, (void *)client, _free_client);
 
                 source->listeners--;
@@ -782,7 +781,9 @@ void source_main (source_t *source)
                  */
                 client = (client_t *)client_node->key;
                 client_node = avl_get_next(client_node);
+                #ifdef HAVE_CURL
                 on_client_disconnect (source, client);
+                #endif
                 avl_delete(source->pending_tree, (void *)client, _free_client);
 
                 INFO0("Client deleted, exceeding maximum listeners for this "

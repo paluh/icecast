@@ -53,6 +53,11 @@ char *util_dict_urlencode(util_dict *dict, char delim);
 void util_run_script(char *path, ...);
 #endif
 
+#ifdef HAVE_CURL
+void log_listener(const char* listener_id, const char* con_time,
+                  const char* discon_time, const char* ip, const char* mount);
+#endif
+
 #ifndef HAVE_LOCALTIME_R
 struct tm *localtime_r (const time_t *timep, struct tm *result);
 #endif

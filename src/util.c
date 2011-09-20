@@ -36,6 +36,12 @@
 #define strncasecmp strnicmp
 #endif
 
+#ifdef HAVE_CURL
+#include <curl/curl.h>
+#include <curl/types.h>
+#include <curl/easy.h>
+#endif
+
 #include "net/sock.h"
 #include "thread/thread.h"
 
@@ -737,5 +743,66 @@ void util_run_script(char *path, ...) {
             break;
     }
     free(argv);
+}
+#endif
+
+#ifdef HAVE_CURL
+void log_listener(const char* listener_id, const char* con_time,
+                  const char* discon_time, const char* ip, const char* mount) {
+
+    CURL *handle;
+    CURLcode resp;
+
+    ice_config_t *config;
+
+    struct curl_httppost *formpost=NULL;
+    struct curl_httppost *lastptr=NULL;
+
+    curl_formadd(&formpost,
+                  &lastptr,
+                  CURLFORM_COPYNAME, "listener_id",
+                  CURLFORM_COPYCONTENTS, listener_id,
+                  CURLFORM_END);
+
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "con_time",
+                 CURLFORM_COPYCONTENTS, con_time,
+                 CURLFORM_END);
+
+    if(discon_time != NULL) {
+        curl_formadd(&formpost,
+                     &lastptr,
+                     CURLFORM_COPYNAME, "discon_time",
+                     CURLFORM_COPYCONTENTS, discon_time,
+                     CURLFORM_END);
+    };
+
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "ip",
+                 CURLFORM_COPYCONTENTS, ip,
+                 CURLFORM_END);
+
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "mount",
+                 CURLFORM_COPYCONTENTS, mount,
+                 CURLFORM_END);
+
+    handle = curl_easy_init();
+
+    config = config_get_config();
+    if (handle && config->listeners_handler) {
+        curl_easy_setopt(handle, CURLOPT_URL, config->listeners_handler);
+        curl_easy_setopt(handle, CURLOPT_HTTPPOST, formpost);
+        curl_easy_setopt(handle, CURLOPT_TIMEOUT, 2);
+
+        resp = curl_easy_perform(handle);
+        curl_easy_cleanup(handle);
+        curl_formfree(formpost);
+
+    };
+    config_release_config();
 }
 #endif
