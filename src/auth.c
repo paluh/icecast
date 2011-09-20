@@ -424,22 +424,6 @@ static int add_listener_to_source (source_t *source, client_t *client)
 
     DEBUG1 ("Added client to %s", source->mount);
 
-    ice_config_t *config = config_get_config();
-
-    if(config->listeners_handler) {
-        char listener_id[22], con_time[22];
-
-        memset(listener_id, '\000', sizeof(listener_id));
-        snprintf(listener_id, sizeof(listener_id)-1, "%lu", client->con->id);
-
-        memset(con_time, '\000', sizeof(con_time));
-        // use con_time as id -> it's better then pure id value
-        snprintf(con_time, sizeof(con_time)-1, "%lu", (unsigned long)client->con->con_time);
-
-        util_run_script(config->listeners_handler, config->listeners_handler, listener_id,
-                        con_time, "0", client->con->ip, source->mount, NULL);
-    }
-    config_release_config();
     return 0;
 }
 
