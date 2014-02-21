@@ -862,7 +862,7 @@ void source_main (source_t *source)
 static void source_shutdown (source_t *source)
 {
     mount_proxy *mountinfo;
-    char *dumpfilename;
+    char *dumpfilename = NULL;
 
     source->running = 0;
     INFO1("Source \"%s\" exiting", source->mount);
