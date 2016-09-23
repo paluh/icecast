@@ -233,7 +233,8 @@ void xslt_transform(xmlDocPtr doc, const char *xslfilename, client_t *client)
         if (string == NULL)
             string = xmlCharStrdup ("");
         snprintf (refbuf->data, full_len,
-                "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n%s",
+                "HTTP/1.0 200 OK\r\nContent-Type: %s\r\nAccess-Control-Allow-Origin: *\r\nContent-Length: %d\r\n\r\n
+%s",
                 mediatype, len, string);
 
         client->respcode = 200;
